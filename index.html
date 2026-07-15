@@ -210,20 +210,34 @@
   }
 
   function drawPipes() {
+    // pipe.png is 112x400: the top half (rows 0-200) is designed as the
+    // TOP pipe, with its "JOB" mouth near the bottom edge of that half.
+    // The bottom half (rows 200-400) is designed as the BOTTOM pipe,
+    // with its "JOB" mouth near the top edge of that half. Both mouths
+    // should land right at the gap, so we slice the source image instead
+    // of flipping a single sprite.
+    const srcW = images.pipe.width;
+    const srcH = images.pipe.height;
+    const halfH = srcH / 2;
+
     pipes.forEach(p => {
       const topH = p.gapY - PIPE_GAP / 2;
       const botY = p.gapY + PIPE_GAP / 2;
       const botH = H - GROUND_HEIGHT - botY;
 
-      // top pipe (flipped)
-      ctx.save();
-      ctx.translate(p.x, topH);
-      ctx.scale(1, -1);
-      ctx.drawImage(images.pipe, 0, 0, PIPE_WIDTH, topH);
-      ctx.restore();
+      // top pipe: source rows [0, halfH], mouth (bottom of source) sits at the gap
+      ctx.drawImage(
+        images.pipe,
+        0, 0, srcW, halfH,
+        p.x, 0, PIPE_WIDTH, topH
+      );
 
-      // bottom pipe
-      ctx.drawImage(images.pipe, p.x, botY, PIPE_WIDTH, botH);
+      // bottom pipe: source rows [halfH, srcH], mouth (top of source) sits at the gap
+      ctx.drawImage(
+        images.pipe,
+        0, halfH, srcW, halfH,
+        p.x, botY, PIPE_WIDTH, botH
+      );
     });
   }
 
